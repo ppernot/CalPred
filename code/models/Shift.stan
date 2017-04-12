@@ -55,7 +55,7 @@ generated quantities{
   br = quad_form(inverse(diag_matrix(V_T)),resid) / (N-n_grp-2);
   
   for (i in 1:N)
-    y_pred_cont[i] = normal_rng(mu_M[i],V_T[i]^0.5);
+    y_pred_cont[i] = normal_rng(mu_M[i],(V_T[i]+tau^2)^0.5);
     
   for (i in 1:N2) {
     vy  = phys_mod(x_new[i],eps,sig,inadequacy);

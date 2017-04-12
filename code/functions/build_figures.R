@@ -9,12 +9,3 @@ for (model_tag in list_meth) {
   plot_all(legend=list_legends[model_tag])
   
 }
-
-## Plot shifts for relevant methods
-
-list_meth_shift = list_meth[grep('Shift',list_meth)]
-
-if(length(list_meth_shift) > 0)
-  plot_shifts(model_tags=list_meth_shift, 
-              true_shifts=data$true_shifts, 
-              cexPlot = cexPlot)

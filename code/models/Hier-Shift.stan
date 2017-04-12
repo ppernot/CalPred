@@ -92,7 +92,7 @@ generated quantities{
 
   for (i in 1:N) {
     vy  = phys_mod(x[i],mup[1],mup[2],inadequacy);
-    y_pred_cont[i] = normal_rng(vy, V_T[i]^0.5);
+    y_pred_cont[i] = normal_rng(vy, (V_T[i] + tau^2)^0.5);
   }
 
   for (i in 1:N2) {

@@ -107,7 +107,7 @@ generated quantities{
   br = quad_form(Vm1,resid) / (N - 4 - neff - n_grp);
   
   for (i in 1:N)
-    y_pred_cont[i] = normal_rng(mu_M0[i],uy[i]);
+    y_pred_cont[i] = normal_rng(mu_M0[i],(uy[i]^2+tau^2)^0.5);
 
   y_gp = K2 * (y-mu_M);
   y_m = phys_mod_vec(x_new,eps,sig,inadequacy); 

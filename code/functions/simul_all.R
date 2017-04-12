@@ -11,7 +11,7 @@ dir.create(path=paste0('simulation/',case,'/diagnostics'),
            showWarnings = FALSE)
 
 # Generate/load data ####
-set.seed(repeat_seed)
+set.seed(127)
 if(substr(case,1,2)=='SD') {
   data = gen_synth_data(shift=shift)
 } else {

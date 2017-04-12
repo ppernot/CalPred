@@ -4,37 +4,36 @@ rm(list = ls())
 # Set misc. options and load libraries and functions ####
 options(width=120)
 
-if(!require(knitr))
-  install.packages("knitr",dependencies=TRUE)
-library(knitr) # Provides kable
-
-if(!require(parallel))
-  install.packages("parallel",dependencies=TRUE)
-library(parallel)
+libs = c('parallel', 'rstan', 'knitr', 'aplpack', 'RColorBrewer')
+void = sapply(libs,
+              function(x)
+                if(!require(x,
+                            character.only = T,
+                            warn.conflicts = F,
+                            quietly = T)
+                ) 
+                  install.packages(x)
+)
+rm(void,libs)
 options(mc.cores = parallel::detectCores())
-
-if(!require(rstan))
-  install.packages("rstan",dependencies=TRUE)
-library(rstan)
 rstan_options(auto_write = TRUE)
 
-# Physical model functions for stan and R 
+# Physical model functions for stan 
 phys_model = 
   paste0(
     readLines(con='code/models/phys_model.stan'),
     collapse='\n'
   )
-source('code/models/phys_model.R')
 
 # Misc. R functions
+source('code/models/phys_model.R')
 source('code/functions/gen_synth_data.R')
 source('code/functions/plot_funcs.R')
 
-# Sampling parameters
-nb_warmup   = 1000
-nb_iter     = 5000
-nb_chains   = 4
-repeat_seed = 127   # Random seed used for repeatability
+# Sampling options
+nb_warmup = 1000
+nb_iter   = 5000
+nb_chains = 4
 
 #################################################################
 
@@ -44,13 +43,14 @@ inadequacy = TRUE  # Model inadequacy
 shift      = FALSE # Data inconsistency
 
 ## Define methods
-list_meth=c('Std','Disp','GP','WLS','VarInf_Rb','VarInf_MSR','Margin','ABC','HierC')
-list_legends=c(TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE)
+list_meth=c('Std','Disp','GP','WLS','VarInf_Rb',
+            'VarInf_MSR','Margin','ABC','HierC','HierC-loc')[1:10]
+list_legends=c(TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE)
 names(list_legends)= list_meth
 
 ## Define plot limits
 eps_lim = c(180,300)     # Limits for epsilon plots
-sig_lim = c(3.45, 3.65)   # Limits for sigma plots
+sig_lim = c(3.45, 3.65)  # Limits for sigma plots
 res_lim = c(-1,1) * 0.6  # Limits for residuals plots
 
 ## Run simulations 
@@ -74,6 +74,11 @@ res_lim = c(-1,1) * 1.5  # Limits for residuals plots
 ## Run simulations for the current case
 source('code/functions/simul_all.R')
 
+## Plot shifts for relevant methods
+plot_shifts(model_tags=list_meth[c(2,5)], 
+            true_shifts=data$true_shifts, 
+            cexPlot = cexPlot)
+
 # Case: SD-3 ####################################################
 case= 'SD-3'
 inadequacy = TRUE
@@ -92,6 +97,11 @@ res_lim = c(-1,1) * 1.0  # Limits for residuals plots
 
 ## Run simulations for the current case
 source('code/functions/simul_all.R')
+
+## Plot shifts for relevant methods
+plot_shifts(model_tags=list_meth[grep('Shift',list_meth)], 
+            true_shifts=data$true_shifts, 
+            cexPlot = cexPlot)
 
 # Case: Kr ######################################################
 case= 'Kr'
@@ -112,7 +122,12 @@ res_lim = c(-1,1) * 1.5  # Limits for residuals plots
 ## Run simulations for the current case
 source('code/functions/simul_all.R')
 
+## Plot shifts for relevant methods
+plot_shifts(model_tags=list_meth[grep('Shift',list_meth)], 
+            cexPlot = cexPlot)
+
 # Session Info ####
 sink(file='session_info.txt')
-print(sessionInfo())
+writeLines(readLines(file.path(Sys.getenv("HOME"), ".R/Makevars")))
+devtools::session_info()
 sink()
